@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
@@ -84,14 +85,15 @@ app.use((req, res, next) => {
 
   // لێرەدا ڕاستکراوەتەوە: تەنها یەک پۆرت و داخستنی کەوانەکان
   const port = parseInt(process.env.PORT || "3000", 10);
+  const host = process.env.NODE_ENV === "production" ? "0.0.0.0" : "127.0.0.1";
   
   httpServer.listen(
     {
       port,
-      host: "127.0.0.1",
+      host,
     },
     () => {
-      log(`serving on http://127.0.0.1:${port}`);
+      log(`serving on http://${host === "0.0.0.0" ? "localhost" : host}:${port}`);
     },
   );
 })(); // ئەم کەوانەیە گرنگ بوو بۆ داخستنی (async () => {
