@@ -15,11 +15,11 @@ export function serveStatic(app: Express) {
   // Serve static files
   app.use(express.static(distPath));
   
-  // SPA fallback - serve index.html for all non-API routes
-  app.get("*", (req: Request, res: Response) => {
+  // SPA fallback - middleware for all non-API routes
+  app.use((req: Request, res: Response, next: Function) => {
+    // Skip API routes
     if (req.path.startsWith("/api")) {
-      // Let API routes be handled elsewhere
-      return res.status(404).json({ message: "Not found" });
+      return next();
     }
     
     const indexPath = resolve(distPath, "index.html");
