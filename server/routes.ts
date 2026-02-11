@@ -1,14 +1,12 @@
 
 import type { Express, Request, Response, NextFunction } from "express";
 import type { Server } from "http";
-import type { Express as ExpressServer } from "express";
 import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import session from "express-session";
 import MemoryStore from "memorystore";
 import multer from "multer";
-import type { Multer } from "multer";
 import path from "path";
 import fs from "fs";
 import express from "express";
@@ -21,21 +19,21 @@ declare module "express-session" {
 }
 
 // Multer setup
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: (req: Request, file: Express.Multer.File, cb: (err: Error | null, destination?: string) => void) => {
-      const uploadDir = "uploads";
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir);
-      }
-      cb(null, uploadDir);
-    },
-    filename: (req: Request, file: Express.Multer.File, cb: (err: Error | null, filename?: string) => void) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      cb(null, uniqueSuffix + path.extname(file.originalname));
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = "uploads";
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir);
     }
-  })
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
 });
+
+const upload = multer({ storage: storage });
 
 export async function registerRoutes(
   httpServer: Server,
@@ -70,7 +68,7 @@ export async function registerRoutes(
   };
 
   // === Auth Routes ===
-  app.post(api.auth.login.path, async (req, res) => {
+  app.post(api.auth.login.path, async (req: Request, res: Response) => {
     try {
       const input = api.auth.login.input.parse(req.body);
 
@@ -85,37 +83,38 @@ export async function registerRoutes(
         });
       }
 
-      req.session.userId = user.id;
+      (req as any).session.userId = user.id;
       res.json(user);
     } catch (err) {
       res.status(400).json({ message: "Invalid input" });
     }
   });
 
-  app.post(api.auth.logout.path, (req, res) => {
-    req.session.destroy(() => {
+  app.post(api.auth.logout.path, (req: Request, res: Response) => {
+    (req as any).session.destroy(() => {
       res.sendStatus(200);
     });
   });
 
-  app.get(api.auth.me.path, async (req, res) => {
-    if (!req.session.userId) {
+  app.get(api.auth.me.path, async (req: Request, res: Response) => {
+    if (!(req as any).session.userId) {
       return res.status(401).json({ message: "Not logged in" });
     }
-    const user = await storage.getUser(req.session.userId);
+    const user = await storage.getUser((req as any).session.userId);
     res.json(user);
   });
 
   // === Upload Route ===
-  app.post("/api/upload", requireAuth, upload.single("file"), (req, res) => {
-    if (!req.file) {
+  app.post("/api/upload", requireAuth, upload.single("file"), (req: Request, res: Response) => {
+    const file = (req as any).file;
+    if (!file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
-    const fileUrl = `/uploads/${req.file.filename}`;
+    const fileUrl = `/uploads/${file.filename}`;
     res.json({
-      fileName: req.file.originalname,
+      fileName: file.originalname,
       fileUrl: fileUrl,
-      fileType: req.file.mimetype
+      fileType: file.mimetype
     });
   });
 
