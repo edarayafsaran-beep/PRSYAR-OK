@@ -10,9 +10,8 @@ export function serveStatic(app: Express) {
   
   app.use(express.static(distPath));
   
-  // لێرەدا لەبری نیشانەی ئەستێرە یان (.*)، ئەم شێوازە بەکار دێنین:
+  // لێرەدا لەبری "*" ئەمە بنووسە بۆ ئەوەی چیتر PathError نەدات
   app.get("*", (_req, res, next) => {
-    // ئەگەر داواکارییەکە بۆ API نەبوو، ئینجا index.html بنێرە
     if (_req.path.startsWith("/api")) {
       return next();
     }
