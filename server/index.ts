@@ -1,4 +1,4 @@
-
+index.ts
 import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes.ts"; // لێرە .js لادراوە بۆ ئەوەی کراش نەکات
