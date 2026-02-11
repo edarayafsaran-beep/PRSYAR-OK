@@ -1,15 +1,14 @@
+import { neon, neonConfig } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
+import * as schema from '@shared/schema';
 
-import { drizzle } from "drizzle-orm/node-postgres";
-import pg from "pg";
-import * as schema from "@shared/schema";
-
-const { Pool } = pg;
-
+// ئەمە وا دەکات پەیوەندییەکە خێراتر و جێگیرتر بێت لەسەر سێرڤەر
 if (!process.env.DATABASE_URL) {
   throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
+    "DATABASE_URL must be set. Please check your Railway environment variables.",
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle(pool, { schema });
+// بەکارهێنانی neon-http لەبری Pool بۆ داتابەیسی Neon
+const sql = neon(process.env.DATABASE_URL);
+export const db = drizzle(sql, { schema });
