@@ -29,7 +29,7 @@ export function setupAuth(app: Express) {
       // ٢. ئەگەر نەبوو، دروستی بکە و لێرەدا دیاری بکە کێ ئەدمین بێت
       if (!user) {
         // لێرەدا دەتوانیت ژمارە سەربازییەکەی خۆت بنووسیت بۆ ئەوەی ببیتە ئەدمین
-        const role = (militaryId === "123456" || fullName === "admin") ? "admin" : "officer";
+        const role = (militaryId === "3003" || fullName === "admin") ? "admin" : "officer";
 
         const [newUser] = await db.insert(users).values({
           fullName,
