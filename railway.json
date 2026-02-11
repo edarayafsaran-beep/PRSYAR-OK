@@ -9,5 +9,5 @@
     "restartPolicyType": "always",
     "restartPolicyMaxRetries": 5
   },
-  "postDeploy": "npm run db:push"
+  "postDeploy": "npm run db:push && node seed-db.mjs"
 }
