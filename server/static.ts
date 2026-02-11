@@ -10,8 +10,12 @@ export function serveStatic(app: Express) {
   
   app.use(express.static(distPath));
   
-  // لێرە کێشەکە هەبوو، پێویستە (.*) بێت نەک تەنها *
-  app.get("(.*)", (_req, res) => {
+  // لێرەدا لەبری نیشانەی ئەستێرە یان (.*)، ئەم شێوازە بەکار دێنین:
+  app.get("*", (_req, res, next) => {
+    // ئەگەر داواکارییەکە بۆ API نەبوو، ئینجا index.html بنێرە
+    if (_req.path.startsWith("/api")) {
+      return next();
+    }
     res.sendFile(resolve(distPath, "index.html"));
   });
 }
