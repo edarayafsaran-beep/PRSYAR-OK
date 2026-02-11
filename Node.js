@@ -1,0 +1,1 @@
+You are using Node.js 20.18.1. Vite requires Node.js version 20.19+ or 22.12+.
