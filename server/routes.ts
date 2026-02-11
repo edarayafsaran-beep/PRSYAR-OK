@@ -1,12 +1,14 @@
 
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import type { Server } from "http";
+import type { Express as ExpressServer } from "express";
 import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import session from "express-session";
 import MemoryStore from "memorystore";
 import multer from "multer";
+import type { Multer } from "multer";
 import path from "path";
 import fs from "fs";
 import express from "express";
@@ -21,14 +23,14 @@ declare module "express-session" {
 // Multer setup
 const upload = multer({
   storage: multer.diskStorage({
-    destination: (req, file, cb) => {
+    destination: (req: Request, file: Express.Multer.File, cb: (err: Error | null, destination?: string) => void) => {
       const uploadDir = "uploads";
       if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir);
       }
       cb(null, uploadDir);
     },
-    filename: (req, file, cb) => {
+    filename: (req: Request, file: Express.Multer.File, cb: (err: Error | null, filename?: string) => void) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
       cb(null, uniqueSuffix + path.extname(file.originalname));
     }
@@ -60,7 +62,7 @@ export async function registerRoutes(
   app.use("/uploads", express.static("uploads"));
 
   // Auth Middleware
-  const requireAuth = (req: any, res: any, next: any) => {
+  const requireAuth = (req: Request, res: Response, next: NextFunction) => {
     if (!req.session.userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
