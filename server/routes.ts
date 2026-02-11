@@ -1,4 +1,3 @@
-
 import type { Express, Request, Response, NextFunction } from "express";
 import type { Server } from "http";
 import { storage as db } from "./storage";
